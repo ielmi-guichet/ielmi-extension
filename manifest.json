@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "IELMI PRO - Injecteur Cloud",
+  "version": "2.0",
+  "description": "Remplissage automatique intelligent par Internet",
+  "permissions": ["activeTab", "scripting"],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}

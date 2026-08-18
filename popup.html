@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { width: 250px; font-family: Arial, sans-serif; padding: 15px; background: #F4F6F9; text-align: center; margin: 0; }
+        h3 { color: #0D47A1; margin: 0 0 5px 0; font-size: 18px; font-weight: 800; }
+        h3 span { color: #FFD700; }
+        .status { font-size: 12px; color: #2E7D32; font-weight: bold; background: #E8F5E9; padding: 8px; border-radius: 6px; border: 1px dashed #A5D6A7; margin-bottom: 12px; }
+        input { width: 90%; padding: 10px; margin: 8px 0; border: 2px solid #E0E0E0; border-radius: 8px; text-align: center; font-size: 15px; font-weight: bold; }
+        button { background: #0D47A1; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        button:hover { background: #0b3c8f; }
+    </style>
+</head>
+<body>
+    <h3>IELMI <span>PRO</span></h3>
+    <div class="status" id="statut-text">📡 EN ATTENTE DE LIAISON</div>
+    <input type="text" id="code-borne" placeholder="CODE A 4 CHIFFRES">
+    <button id="btn-connecter">Lier le Comptoir</button>
+    <script src="popup.js"></script>
+</body>
+</html>
