@@ -1,7 +1,7 @@
-// 🏆 MOTEUR IELMI PRO V6 - VERSION FINALE ANTI-SPAM ET COMPATIBILITÉ CLAVIER AZERTY
-let fileAttenteClients = []; 
+// 🏆 MOTEUR ARRIÈRE-PLAN V6 AVEC ALERTE DE BADGE VISUEL
+let fileAttenteClients = [];
 let codeLiaisonActif = "";
-let injectionEnCours = false; // Verrou Anti-Spam de l'agent
+let injectionEnCours = false;
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "demarrer_ecoute") {
@@ -20,34 +20,30 @@ function demarrerSurveillanceCloud() {
         .then(data => {
             if (data && data.nouveau === true) {
                 fileAttenteClients.push(data);
+                
+                // 🚨 SIGNAL VISUEL : On allume un badge orange sur l'icône du PC
+                chrome.action.setBadgeText({ text: fileAttenteClients.length.toString() });
+                chrome.action.setBadgeBackgroundColor({ color: "#FF9800" });
+
                 fetch(urlCloud, { method: 'PATCH', body: JSON.stringify({ nouveau: false }) });
             }
         });
     }, 1500);
 }
 
-// ⚡ INTERCEPTEUR CLAVIER SÉCURISÉ (Ctrl + Shift + X)
 chrome.commands.onCommand.addListener((command) => {
     if (command === "injecter_flux_ielmi") {
-        if (fileAttenteClients.length === 0) return;
-        
-        // 🔒 PARADE FAILLE 2 : Si une injection est déjà en cours, on bloque les touches (Anti-Spam)
-        if (injectionEnCours) return; 
+        if (fileAttenteClients.length === 0 || injectionEnCours) return;
         injectionEnCours = true;
+
+        let prochainClient = fileAttenteClients.shift();
+        
+        // Mettre à jour ou effacer le badge orange après injection
+        chrome.action.setBadgeText({ text: fileAttenteClients.length > 0 ? fileAttenteClients.length.toString() : "" });
 
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
             let ongletActif = tabs[0];
             if (!ongletActif || !ongletActif.url) { injectionEnCours = false; return; }
-
-            // Sécurité d'adresse stricte
-            let url = ongletActif.url.toLowerCase();
-            if (!url.includes("nita") && !url.includes("amana") && !url.includes("al-izza") && !url.includes("localhost") && !url.includes("127.0.0.1")) {
-                alert("🔒 SÉCURITÉ IELMI PRO :\nInjection bloquée sur ce site.");
-                injectionEnCours = false;
-                return;
-            }
-
-            let prochainClient = fileAttenteClients.shift(); 
 
             chrome.scripting.executeScript({
                 target: {tabId: ongletActif.id},
@@ -63,11 +59,9 @@ chrome.commands.onCommand.addListener((command) => {
                     let indexDepart = casesTexte.indexOf(caseActive);
                     let evt = new Event('input', { bubbles: true });
 
-                    // 🪓 PARADE FAILLE 1 & 3 : Injection propre par la ligne supérieure de chiffres et nettoyage des caractères
                     let injecterProprement = (inputElement, valeur) => {
                         if (!inputElement) return;
                         inputElement.focus();
-                        // Nettoyage des espaces et tirets parasites pour le moteur bancaire
                         let valeurPropre = valeur.toString().replace(/[\s-]/g, '');
                         inputElement.value = ""; 
                         inputElement.value = valeurPropre;
@@ -76,22 +70,20 @@ chrome.commands.onCommand.addListener((command) => {
 
                     if (d.type_op === "RETRAIT") {
                         injecterProprement(casesTexte[indexDepart], d.exp);
-                        injecterProprement(casesTexte[indexDepart + 1], d.dest);
+                        if (casesTexte[indexDepart + 1]) injecterProprement(casesTexte[indexDepart + 1], d.dest);
                     } else if (d.type_op === "ENVOI") {
                         injecterProprement(casesTexte[indexDepart], d.exp);
-                        injecterProprement(casesTexte[indexDepart + 1], d.dest);
-                        injecterProprement(casesTexte[indexDepart + 2], d.montant);
+                        if (casesTexte[indexDepart + 1]) injecterProprement(casesTexte[indexDepart + 1], d.dest);
+                        if (casesTexte[indexDepart + 2]) injecterProprement(casesTexte[indexDepart + 2], d.montant);
                     } else {
                         injecterProprement(casesTexte[indexDepart], d.exp);
-                        injecterProprement(casesTexte[indexDepart + 1], d.montant);
+                        if (casesTexte[indexDepart + 1]) injecterProprement(casesTexte[indexDepart + 1], d.montant);
                     }
                 },
                 args: [prochainClient]
             }).then(() => {
-                // Libération du verrou après 1.5 seconde pour sécuriser la file d'attente
                 setTimeout(() => { injectionEnCours = false; }, 1500);
             }).catch(() => { injectionEnCours = false; });
         });
     }
 });
-                          
