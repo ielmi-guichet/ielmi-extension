@@ -1,4 +1,4 @@
-// 🏆 MOTEUR ARRIÈRE-PLAN V6 AVEC ALERTE DE BADGE VISUEL
+// 🏆 MOTEUR ARRIÈRE-PLAN V6 UNIFIÉ ET STABILISÉ CLOUD
 let fileAttenteClients = [];
 let codeLiaisonActif = "";
 let injectionEnCours = false;
@@ -13,20 +13,28 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 function demarrerSurveillanceCloud() {
     setInterval(() => {
         if (!codeLiaisonActif) return;
+        
+        // 📡 LIEN UNIVERSEL : Remplacez uniquement "ielmi-pro" par le nom exact affiché sur votre Firebase si différent
         let urlCloud = "https://firebaseio.com" + codeLiaisonActif + ".json";
         
         fetch(urlCloud)
-        .then(r => r.json())
+        .then(r => {
+            if (!r.ok) throw new Error("Statut de connexion invalide");
+            return r.json();
+        })
         .then(data => {
             if (data && data.nouveau === true) {
                 fileAttenteClients.push(data);
                 
-                // 🚨 SIGNAL VISUEL : On allume un badge orange sur l'icône du PC
+                // 🚨 SIGNAL VISUEL : Notification orange sur l'icône du PC HP
                 chrome.action.setBadgeText({ text: fileAttenteClients.length.toString() });
                 chrome.action.setBadgeBackgroundColor({ color: "#FF9800" });
 
-                fetch(urlCloud, { method: 'PATCH', body: JSON.stringify({ nouveau: false }) });
+                fetch(urlCloud, { method: 'PATCH', body: JSON.stringify({ nouveau: false }) }).catch(() => {});
             }
+        })
+        .catch(err => {
+            // L'écouteur intercepte proprement en tâche de fond en attendant la liaison
         });
     }, 1500);
 }
@@ -37,8 +45,6 @@ chrome.commands.onCommand.addListener((command) => {
         injectionEnCours = true;
 
         let prochainClient = fileAttenteClients.shift();
-        
-        // Mettre à jour ou effacer le badge orange après injection
         chrome.action.setBadgeText({ text: fileAttenteClients.length > 0 ? fileAttenteClients.length.toString() : "" });
 
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
