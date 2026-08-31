@@ -1,4 +1,4 @@
-// 🏆 MOTEUR ARRIÈRE-PLAN V6 UNIFIÉ ET STABILISÉ CLOUD
+// 🏆 MOTEUR ARRIÈRE-PLAN V6 DÉFINITIF ET STABILISÉ
 let fileAttenteClients = [];
 let codeLiaisonActif = "";
 let injectionEnCours = false;
@@ -14,7 +14,7 @@ function demarrerSurveillanceCloud() {
     setInterval(() => {
         if (!codeLiaisonActif) return;
         
-        // 📡 LIEN UNIVERSEL : Remplacez uniquement "ielmi-pro" par le nom exact affiché sur votre Firebase si différent
+        // 📡 LE LIEN VERITABLE ET SOUDEUR DE COMPTOIR UNI
         let urlCloud = "https://firebaseio.com" + codeLiaisonActif + ".json";
         
         fetch(urlCloud)
@@ -48,7 +48,7 @@ chrome.commands.onCommand.addListener((command) => {
         chrome.action.setBadgeText({ text: fileAttenteClients.length > 0 ? fileAttenteClients.length.toString() : "" });
 
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            let ongletActif = tabs[0];
+            let ongletActif = tabs;
             if (!ongletActif || !ongletActif.url) { injectionEnCours = false; return; }
 
             chrome.scripting.executeScript({
@@ -93,3 +93,4 @@ chrome.commands.onCommand.addListener((command) => {
         });
     }
 });
+                
