@@ -1,4 +1,4 @@
-// 🏆 MOTEUR ARRIÈRE-PLAN V6 DÉFINITIF ET STABILISÉ
+// 🏆 MOTEUR ARRIÈRE-PLAN V6 UNIFIÉ ET ALIGNÉ SUR LA BORNE
 let fileAttenteClients = [];
 let codeLiaisonActif = "";
 let injectionEnCours = false;
@@ -14,14 +14,11 @@ function demarrerSurveillanceCloud() {
     setInterval(() => {
         if (!codeLiaisonActif) return;
         
-        // 📡 LE LIEN VERITABLE ET SOUDEUR DE COMPTOIR UNI
+        // 📡 Même tiroir exact que la tablette Oppo
         let urlCloud = "https://firebaseio.com" + codeLiaisonActif + ".json";
         
         fetch(urlCloud)
-        .then(r => {
-            if (!r.ok) throw new Error("Statut de connexion invalide");
-            return r.json();
-        })
+        .then(r => r.json())
         .then(data => {
             if (data && data.nouveau === true) {
                 fileAttenteClients.push(data);
@@ -30,12 +27,11 @@ function demarrerSurveillanceCloud() {
                 chrome.action.setBadgeText({ text: fileAttenteClients.length.toString() });
                 chrome.action.setBadgeBackgroundColor({ color: "#FF9800" });
 
+                // Marquer comme lu pour ne pas tourner en boucle
                 fetch(urlCloud, { method: 'PATCH', body: JSON.stringify({ nouveau: false }) }).catch(() => {});
             }
         })
-        .catch(err => {
-            // L'écouteur intercepte proprement en tâche de fond en attendant la liaison
-        });
+        .catch(err => { /* Évite les pollutions de console */ });
     }, 1500);
 }
 
@@ -48,7 +44,7 @@ chrome.commands.onCommand.addListener((command) => {
         chrome.action.setBadgeText({ text: fileAttenteClients.length > 0 ? fileAttenteClients.length.toString() : "" });
 
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            let ongletActif = tabs;
+            let ongletActif = tabs[0];
             if (!ongletActif || !ongletActif.url) { injectionEnCours = false; return; }
 
             chrome.scripting.executeScript({
@@ -93,4 +89,3 @@ chrome.commands.onCommand.addListener((command) => {
         });
     }
 });
-                
